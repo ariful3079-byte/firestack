@@ -342,6 +342,10 @@ jobs:
     name: 🪪 Artifact attestations
     needs: build
     if: ${{ needs.build.result == 'success' && needs.build.outputs.artifact-subjects != '' && needs.build.outputs.publish == 'true' }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     uses: ./.github/workflows/provenance.yml
     with:
       subjects: ${{ needs.build.outputs.artifact-subjects }}
