@@ -352,18 +352,30 @@ jobs:
       sbom-info: ${{ needs.build.outputs.sbom-info }}
 
   publish:
-    name: 🚚 Publish
-    needs:
-      - build
-      - attestation
-    if: ${{ needs.build.result == 'success' && needs.attestation.result == 'success' && needs.build.outputs.publish == 'true' }}
-    uses: ./.github/workflows/publish.yml
-    with:
-      run_id: ${{ github.run_id }}
-      vcsver: ${{ needs.build.outputs.vcs-ver }}
-      artifact_subjects: ${{ needs.build.outputs.artifact-subjects }}
-      sbom_info: ${{ needs.build.outputs.sbom-info }}
-    secrets: inherit
+  name: 🚚 Publish
+  needs:
+    - build
+    - attestation
+
+  if: ${{ needs.build.result == 'success' &&
+          needs.attestation.result == 'success' &&
+          needs.build.outputs.publish == 'true' }}
+
+  permissions:
+    contents: read
+    actions: read
+    attestations: read
+    packages: write
+
+  uses: ./.github/workflows/publish.yml
+
+  with:
+    run_id: ${{ github.run_id }}
+    vcsver: ${{ needs.build.outputs.vcs-ver }}
+    artifact_subjects: ${{ needs.build.outputs.artifact-subjects }}
+    sbom_info: ${{ needs.build.outputs.sbom-info }}
+
+  secrets: inherit
 
   osv:
     name: 🛡️ OSV scanner
