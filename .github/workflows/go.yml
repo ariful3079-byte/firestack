@@ -342,40 +342,47 @@ jobs:
     name: 🪪 Artifact attestations
     needs: build
     if: ${{ needs.build.result == 'success' && needs.build.outputs.artifact-subjects != '' && needs.build.outputs.publish == 'true' }}
+
     permissions:
       contents: read
       id-token: write
       attestations: write
+
     uses: ./.github/workflows/provenance.yml
+
     with:
       subjects: ${{ needs.build.outputs.artifact-subjects }}
       sbom-info: ${{ needs.build.outputs.sbom-info }}
 
+    secrets: inherit
+
+
   publish:
-  name: 🚚 Publish
-  needs:
-    - build
-    - attestation
+    name: 🚚 Publish
+    needs:
+      - build
+      - attestation
 
-  if: ${{ needs.build.result == 'success' &&
-          needs.attestation.result == 'success' &&
-          needs.build.outputs.publish == 'true' }}
+    if: ${{ needs.build.result == 'success' &&
+            needs.attestation.result == 'success' &&
+            needs.build.outputs.publish == 'true' }}
 
-  permissions:
-    contents: read
-    actions: read
-    attestations: read
-    packages: write
+    permissions:
+      contents: read
+      actions: read
+      attestations: read
+      packages: write
+      id-token: write
 
-  uses: ./.github/workflows/publish.yml
+    uses: ./.github/workflows/publish.yml
 
-  with:
-    run_id: ${{ github.run_id }}
-    vcsver: ${{ needs.build.outputs.vcs-ver }}
-    artifact_subjects: ${{ needs.build.outputs.artifact-subjects }}
-    sbom_info: ${{ needs.build.outputs.sbom-info }}
+    with:
+      run_id: ${{ github.run_id }}
+      vcsver: ${{ needs.build.outputs.vcs-ver }}
+      artifact_subjects: ${{ needs.build.outputs.artifact-subjects }}
+      sbom_info: ${{ needs.build.outputs.sbom-info }}
 
-  secrets: inherit
+    secrets: inherit
 
   osv:
     name: 🛡️ OSV scanner
